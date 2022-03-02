@@ -11,9 +11,7 @@
 class Grid
 {
     private:
-        std::vector<int> grid_log_odds; // signed char is int but 4 times smaller in memory
-        int log_odds_thresh, log_odds_cap;
-        
+        int log_odds_cap;
         Position origin;
         double cell_size;
         std::vector<Index> mask_inflation;
@@ -34,7 +32,8 @@ class Grid
         int get_key(Index idx);
         bool get_cell(Index idx); // for planners
         bool get_cell(Position pos);
-
+        std::vector<int> grid_log_odds; // signed char is int but 4 times smaller in memory
+        int log_odds_thresh;
         void write_to_msg(nav_msgs::OccupancyGrid &msg_grid_lo, nav_msgs::OccupancyGrid & msg_grid_inf);
 
         Index pos2idx(Position pos);

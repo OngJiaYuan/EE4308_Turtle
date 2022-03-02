@@ -19,8 +19,8 @@ void cbImu(const sensor_msgs::Imu::ConstPtr &msg)
 double wheel_l = 10, wheel_r = 10; // init as 10 bcos both are unlikely to be exactly 10 (both can start at non-zero if u reset the sim). whole doubles can also be exactly compared
 void cbWheels(const sensor_msgs::JointState::ConstPtr &msg)
 {
-    wheel_l = msg->position[1]; // double check the topic. it is labelled there
-    wheel_r = msg->position[0]; // double check the topic. it is labelled there
+    wheel_l = msg->position[0]; // double check the topic. it is labelled there
+    wheel_r = msg->position[1]; // double check the topic. it is labelled there
 }
 
 nav_msgs::Odometry msg_odom;
@@ -164,8 +164,8 @@ int main(int argc, char **argv)
         double change_vel = 0;
         double change_ang_vel = 0;
         double rt = 0; 
-        double wheel_l_old = 10;
-        double wheel_r_old = 10;
+        double wheel_l_old = wheel_l;
+        double wheel_r_old = wheel_r;
         double ang_rbt_old = 0;
         double true_ang = 0;
         double error_x = 0;

@@ -31,7 +31,7 @@ void cbPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
     ang_rbt = atan2(siny_cosp, cosy_cosp);
 }
-
+                
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "turtle_main");
@@ -229,21 +229,16 @@ int main(int argc, char **argv)
                 Index idx_rbt = grid.pos2idx(pos_rbt);
                 int r = grid.get_key(idx_rbt);
 
-
-                // grid.grid_inflation[k] =0;//not inflated
-                // grid.grid_inflation[k] >0;//inflated
-                
                 if(grid.grid_inflation[k] >0)
                 {
-                
-                        //dijkstra
-                    
-
-                    idx;//djistra returns idx as the shortest uninflated point distance from the inflated point
+                        
+                        idx = planner.find_closest_free(idx);
+                        pos_goal = grid.idx2pos(idx);
                 }
                 if(grid.grid_inflation[r] >0)
                 {
-                    idx_rbt;//djistra returns idx as the shortest uninflated point distance from the inflated point
+                    idx_rbt = planner.find_closest_free(idx_rbt);
+                    pos_rbt = grid.idx2pos(idx_rbt);
                 }
                
                 path = planner.get(pos_rbt, pos_goal); // original path

@@ -65,6 +65,83 @@ std::vector<Position> Planner::get(Position pos_start, Position pos_goal)
     }
     return path;
 }
+
+// Current Loc is in inflation zone. Aim to find nearest free point
+Index Planner::find_closest_free(Index idx_start)
+{
+    // Updating H-Cost and G-Cost between start point and every other point
+    for (Node & node : nodes)
+    {
+                //  node.h = dist_oct(node.idx, idx_start);
+                 node.g = 1e5; // a reasonably large number. You can use infinity in clims as well, but clims is not included
+                 node.visited = false;
+    }
+
+    // set start node g cost as zero
+    int k = grid.get_key(idx_start);
+    ROS_INFO("idx_start %d %d", idx_start.i, idx_start.j);
+    Node * node = &(nodes[k]);
+    node->g = 0;
+    add_to_open(node);
+    while (!open_list.empty())
+    {
+        node = poll_from_open();
+        Index current_index = node->idx;
+        // if current vertex is free_vertex
+        if (grid.get_cell(current_index))
+        {   
+            // Return Index if its free vertex
+            return current_index;
+
+        }
+
+        //Add all free, neighbouring vertices into the list
+        // (4) check neighbors and add them if cheaper
+        bool is_cardinal = true;
+        for (int dir = 0; dir < 8; ++dir)
+        {   // for each neighbor in the 8 directions
+
+            // get their index
+            Index & idx_nb_relative = NB_LUT[dir];
+            Index idx_nb(
+                node->idx.i + idx_nb_relative.i,
+                node->idx.j + idx_nb_relative.j
+            );
+
+            // node: current_vertex, idx_nb: neighbout vertex
+            // get the cost if accessing from node as parent
+            double g_nb = node->g; //g_cost of the node
+            g_nb += is_cardinal ? 1 : M_SQRT2;
+
+            int k_nb = grid.get_key(idx_nb);
+
+            if (grid.grid_inflation[k_nb] > 0) // in map, and is inflated
+                g_nb += 1;
+            else if (grid.grid_log_odds[k_nb] > grid.log_odds_thresh)
+               g_nb += 900;
+            else
+                continue; // in map, not inflated, and is log odds free
+
+
+            // // compare the cost to any previous costs. If cheaper, mark the node as the parent
+            // int nb_k = grid.get_key(idx_nb);
+            Node & nb_node = nodes[k_nb]; // use reference so changing nb_node changes nodes[k]
+            if (nb_node.g > g_nb + 1e-5)
+            {   // previous cost was more expensive, rewrite with current
+                nb_node.g = g_nb;
+                nb_node.parent = node->idx;
+
+                // add to open
+                add_to_open(&nb_node); // & a reference means getting the pointer (address) to the reference's object.
+            }
+
+            // toggle is_cardinal
+            is_cardinal = !is_cardinal;
+        }
+        
+    }
+}
+
 std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
 {
     std::vector<Index> path_idx; // clear previous path

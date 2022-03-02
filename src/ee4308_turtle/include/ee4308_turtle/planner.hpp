@@ -27,12 +27,13 @@ class Planner
         Grid & grid; // REFERENCE <-- you cannot put the Planner class into containers (vectors , arrays etc.) 
         
         Planner(Grid & grid);
+        Index find_closest_free(Index idx_start);
         std::vector<Index> get(Index idx_start, Index idx_goal);
         std::vector<Position> get(Position pos_start, Position pos_goal);
-
+        std::deque<Open> open_list;
     private:
         std::vector<Node> nodes; // keeps a record of the cheapest cost of every cell in the grid, as well as their parents
-        std::deque<Open> open_list;
+        
         Index NB_LUT[8] = {{1,0}, {1,1}, {0,1}, {-1,1}, {-1,0}, {-1,-1}, {0,-1}, {1,-1}};
 
         void add_to_open(Node * node);
